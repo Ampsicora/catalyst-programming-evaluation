@@ -24,3 +24,7 @@ class LogicTest
         return $number % $divisor === 0;
     }
 }
+
+
+$logic_test = new LogicTest;
+$logic_test->run();
