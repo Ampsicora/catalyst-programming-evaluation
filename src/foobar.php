@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class LogicTest
+class Foobar
 {
     public function run(string $separator = ', '): void
     {
@@ -26,5 +26,5 @@ class LogicTest
 }
 
 
-$logic_test = new LogicTest;
-$logic_test->run();
+$foobar = new Foobar;
+$foobar->run();
