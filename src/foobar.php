@@ -6,16 +6,16 @@ class LogicTest
 {
     public function run(string $separator = ', '): void
     {
-        for ($i = 1; $i <= 100; $i++) {
+        for ($number = 1; $number <= 100; $number++) {
             $word = '';
 
-            if ($this->is_divisible_by(3, $i))
+            if ($this->is_divisible_by(3, $number))
                 $word .= 'foo';
 
-            if ($this->is_divisible_by(5, $i))
+            if ($this->is_divisible_by(5, $number))
                 $word .= 'bar';
 
-            echo (empty($word) ? $i : $word) . $separator;
+            echo (empty($word) ? $number : $word) . $separator;
         }
     }
 
