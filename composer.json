@@ -1,0 +1,17 @@
+{
+    "name": "ampsicora/catalyst-programming-evaluation",
+    "description": "Catalyst PHP Programming Evaluation",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Ampsicora\\CatalystProgrammingEvaluation\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ampsicora",
+            "email": "ampsicora@pm.me"
+        }
+    ],
+    "require": {}
+}
