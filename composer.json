@@ -13,5 +13,8 @@
             "email": "ampsicora@pm.me"
         }
     ],
-    "require": {}
+    "require": {
+        "league/csv": "^9.10",
+        "illuminate/database": "^10.24"
+    }
 }
