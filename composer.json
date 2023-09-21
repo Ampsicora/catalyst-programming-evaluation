@@ -5,7 +5,8 @@
     "autoload": {
         "psr-4": {
             "Ampsicora\\CatalystProgrammingEvaluation\\": "src/"
-        }
+        },
+        "files": ["src/user_upload/functions.php", "src/user_upload/database/connection.php", "src/user_upload/database/users.php"]
     },
     "authors": [
         {
