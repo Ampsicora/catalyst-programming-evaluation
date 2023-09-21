@@ -12,10 +12,19 @@ class UserUpload
 {
     protected $dryRun;
     protected $createTable;
+
+
+    public function __construct(bool $dryRun, bool $createTable)
+    {
+        $this->dryRun = $dryRun;
+        $this->createTable = $createTable;
+    }
 }
 
 try {
     $options = getopt("u:p:h:", ["file:", "create_table", "dry_run", "help"]);
+
+    optionsCheck($options);
 
     $dryRun         = isset($options['dry_run']);
     $createTable    = isset($options['create_table']);
@@ -27,6 +36,8 @@ try {
         'username'  => $options['u'],
         'password'  => $options['p'],
     ]);
+
+    $userUpload = new UserUpload($dryRun, $createTable);
 } catch (\Throwable $e) {
     echo $e->getMessage();
     exit(1);
