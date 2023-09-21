@@ -18,6 +18,18 @@ class UserUpload
     {
         $this->dryRun = $dryRun;
         $this->createTable = $createTable;
+
+        try {
+            if (!$this->dryRun)
+                $this->addUsersTable();
+
+            if ($this->createTable) {
+                echo 'Users table created successfully';
+                exit(0);
+            }
+        } catch (\Throwable) {
+            throw new Exception("Error Creating the user table");
+        }
     }
 
     public function addUsersTable(): void
