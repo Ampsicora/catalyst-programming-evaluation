@@ -33,6 +33,19 @@ class UserUpload
             $table->timestamps();
         });
     }
+
+    public function getRecordsFromCSV(string $filepath): Iterator
+    {
+        try {
+            $reader = Reader::createFromPath($filepath . '.csv', 'r');
+
+            $reader->setHeaderOffset(0);
+
+            return $reader->getRecords(['name', 'surname', 'email']);
+        } catch (\Throwable) {
+            throw new Exception("Error: impossible to read records from {$filepath}.csv");
+        }
+    }
 }
 
 try {
@@ -52,6 +65,8 @@ try {
     ]);
 
     $userUpload = new UserUpload($dryRun, $createTable);
+
+    $userUpload->run($options['file']);
 } catch (\Throwable $e) {
     echo $e->getMessage();
     exit(1);
