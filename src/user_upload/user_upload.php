@@ -46,6 +46,17 @@ class UserUpload
             throw new Exception("Error: impossible to read records from {$filepath}.csv");
         }
     }
+
+    public function addRecordToDB(array $record)
+    {
+        $user = Users::firstOrNew(['email' => $record['email']], $record);
+
+        if ($user->exists)
+            throw new Exception("Warning: The record {$record['name']}, {$record['surname']}, {$record['email']} is duplicated, so it will not be added to the database\n");
+
+        if (!$this->dryRun)
+            $user->save();
+    }
 }
 
 try {
