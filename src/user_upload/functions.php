@@ -28,3 +28,20 @@ function optionsCheck(array $options)
     if (!isset($options['file'], $options['u'], $options['p'], $options['h']))
         throw new Exception("Error: Missing required options. Use --help for usage information.\n", 1);
 }
+
+function is_email_valid(string $email): bool
+{
+    return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+function normalization(array $record): array
+{
+    $record['name']     = ucfirst(strtolower(trim($record['name'])));
+
+    $record['surname']  = ucfirst(strtolower(trim($record['surname'])));
+
+    $record['email']    = filter_var($record['email'], FILTER_SANITIZE_EMAIL);;
+    $record['email']    = strtolower(trim($record['email']));
+
+    return $record;
+}

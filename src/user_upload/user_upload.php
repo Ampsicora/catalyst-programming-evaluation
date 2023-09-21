@@ -32,6 +32,26 @@ class UserUpload
         }
     }
 
+
+    public function run(string $filepath): void
+    {
+        $records = $this->getRecordsFromCSV($filepath);
+
+        foreach ($records as $record) {
+            try {
+                $record = normalization($record);
+
+                if (!is_email_valid($record['email']))
+                    throw new Exception("Warning: email {$record['email']} is not valid and will not be added to the database \n");
+
+                $this->addRecordToDB($record);
+            } catch (\Throwable $e) {
+                echo $e->getMessage();
+                continue;
+            }
+        }
+    }
+
     public function addUsersTable(): void
     {
         // The table users is dropped following point 4 of script task: "The users database table will need to be created/rebuilt"
