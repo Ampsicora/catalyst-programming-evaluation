@@ -9,6 +9,17 @@ class Connection
 {
     protected Capsule $capsule;
 
+
+    public function __construct(array $config)
+    {
+        $this->addConnection($config);
+
+        $this->capsule->setAsGlobal();
+
+        $this->capsule->bootEloquent();
+    }
+
+
     public function addConnection(array $config)
     {
         $this->capsule = new Capsule;
