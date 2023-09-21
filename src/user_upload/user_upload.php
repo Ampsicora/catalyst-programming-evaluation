@@ -19,6 +19,20 @@ class UserUpload
         $this->dryRun = $dryRun;
         $this->createTable = $createTable;
     }
+
+    public function addUsersTable(): void
+    {
+        // The table users is dropped following point 4 of script task: "The users database table will need to be created/rebuilt"
+        Capsule::schema()->dropIfExists('users');
+
+        Capsule::schema()->create('users', function ($table) {
+            $table->increments('id');
+            $table->string('email')->unique();
+            $table->string('name');
+            $table->string('surname');
+            $table->timestamps();
+        });
+    }
 }
 
 try {
