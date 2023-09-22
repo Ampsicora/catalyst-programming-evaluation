@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+namespace App;
+
+use Exception;
 
 function displayHelp()
 {
@@ -14,19 +17,6 @@ function displayHelp()
     echo "  -p                        MySQL password\n";
     echo "  -h                        MySQL host\n";
     echo "  --help                    Display this help message\n";
-}
-
-function optionsCheck(array $options)
-{
-    // Check for --help option
-    if (isset($options['help'])) {
-        displayHelp();
-        exit(0);
-    }
-
-    // Check for required options
-    if (!isset($options['file'], $options['u'], $options['p'], $options['h']))
-        throw new Exception("Error: Missing required options. Use --help for usage information.\n", 1);
 }
 
 function is_email_valid(string $email): bool

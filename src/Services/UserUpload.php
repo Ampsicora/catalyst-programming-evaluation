@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
-require '../../vendor/autoload.php';
+namespace App\Services;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use League\Csv\Reader;
+use App\Models\User;
+use Exception;
+use Iterator;
+
+use function App\normalization;
+use function App\is_email_valid;
 
 
 class UserUpload
@@ -81,7 +87,7 @@ class UserUpload
 
     public function addRecordToDB(array $record)
     {
-        $user = Users::firstOrNew(['email' => $record['email']], $record);
+        $user = User::firstOrNew(['email' => $record['email']], $record);
 
         if ($user->exists)
             throw new Exception("Warning: The record {$record['name']}, {$record['surname']}, {$record['email']} is duplicated, so it will not be added to the database\n");
@@ -89,28 +95,4 @@ class UserUpload
         if (!$this->dryRun)
             $user->save();
     }
-}
-
-try {
-    $options = getopt("u:p:h:", ["file:", "create_table", "dry_run", "help"]);
-
-    optionsCheck($options);
-
-    $dryRun         = isset($options['dry_run']);
-    $createTable    = isset($options['create_table']);
-
-    $database = new Connection([
-        'driver'    => 'mysql',
-        'host'      => $options['h'],
-        'database'  => 'catalyst',
-        'username'  => $options['u'],
-        'password'  => $options['p'],
-    ]);
-
-    $userUpload = new UserUpload($dryRun, $createTable);
-
-    $userUpload->run($options['file']);
-} catch (\Throwable $e) {
-    echo $e->getMessage();
-    exit(1);
 }
