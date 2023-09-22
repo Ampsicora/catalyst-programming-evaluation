@@ -4,9 +4,11 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Ampsicora\\CatalystProgrammingEvaluation\\": "src/"
+            "App\\": "src/"
         },
-        "files": ["src/user_upload/functions.php", "src/user_upload/database/connection.php", "src/user_upload/database/users.php"]
+        "files": [
+            "functions.php"
+        ]
     },
     "authors": [
         {
@@ -16,6 +18,7 @@
     ],
     "require": {
         "league/csv": "^9.10",
-        "illuminate/database": "^10.24"
+        "illuminate/database": "^10.24",
+        "vlucas/phpdotenv": "^5.5"
     }
 }
