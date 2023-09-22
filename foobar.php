@@ -6,20 +6,24 @@ class Foobar
 {
     public function run(string $separator = ', '): void
     {
+        $numbers = [];
+
         for ($number = 1; $number <= 100; $number++) {
             $word = '';
 
-            if ($this->is_divisible_by(3, $number))
+            if ($this->isDivisibleBy(3, $number))
                 $word .= 'foo';
 
-            if ($this->is_divisible_by(5, $number))
+            if ($this->isDivisibleBy(5, $number))
                 $word .= 'bar';
 
-            echo (empty($word) ? $number : $word) . $separator;
+            $numbers[] = empty($word) ? $number : $word;
         }
+
+        echo implode($separator, $numbers);
     }
 
-    public function is_divisible_by(int $divisor, int $number): bool
+    public function isDivisibleBy(int $divisor, int $number): bool
     {
         return $number % $divisor === 0;
     }
