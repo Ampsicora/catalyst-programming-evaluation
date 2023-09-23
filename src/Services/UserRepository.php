@@ -34,7 +34,7 @@ class UserRepository
 
     public function countEmailDuplications(array $emails): void
     {
-        $this->recordCounter['duplications'] += User::where('email', 'in', $emails)->count();
+        $this->recordCounter['duplications'] += User::whereIn('email', $emails)->count();
     }
 
     public function addChunkToDB(array $chunk)

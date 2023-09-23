@@ -50,7 +50,6 @@ class UserUpload
                 $chunk[] = $record;
 
                 if (!$this->dryRun && count($chunk) === $this->chunkSize) {
-                    $this->userRepository->countEmailDuplications($emails);
                     $this->userRepository->addChunkToDB($chunk);
                     $chunk = [];
                 }
@@ -60,8 +59,8 @@ class UserUpload
             }
         }
 
+        $this->userRepository->countEmailDuplications($emails);
         if (!empty($chunk) && !$this->dryRun) {
-            $this->userRepository->countEmailDuplications($emails);
             $this->userRepository->addChunkToDB($chunk);
             $chunk = [];
         }
