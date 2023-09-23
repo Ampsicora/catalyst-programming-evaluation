@@ -15,14 +15,16 @@ use function App\is_email_valid;
 
 class UserUpload
 {
-    protected bool $dryRun;
     protected UserRepository $userRepository;
+    protected bool $dryRun;
+    protected int $chunkSize;
 
 
-    public function __construct(bool $dryRun, UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, bool $dryRun, int $chunkSize = 500)
     {
-        $this->dryRun           = $dryRun;
         $this->userRepository   = $userRepository;
+        $this->dryRun           = $dryRun;
+        $this->chunkSize        = $chunkSize;
 
         if (!$this->dryRun)
             $userRepository->addUsersTable();
@@ -31,24 +33,30 @@ class UserUpload
 
     public function run(string $filepath): void
     {
-        $records = $this->getRecordsFromCSV($filepath);
+        $records    = $this->getRecordsFromCSV($filepath);
+        $chunk      = [];
 
         foreach ($records as $record) {
             try {
                 $record = normalization($record);
 
-                if (!is_email_valid($record['email']))
+                if (!is_email_valid($record['email'])) {
+                    $this->userRepository->incrementRecordCounter('invalid');
                     throw new Exception("Warning: email {$record['email']} is not valid and will not be added to the database \n");
+                }
 
-                $user = $this->userRepository->addRecordToDB($record);
+                $this->userRepository->checkRecordDuplication($record);
 
                 if (!$this->dryRun)
-                    $user->save();
+                    $this->userRepository->addRecordToDB($record);
             } catch (\Throwable $e) {
                 echo $e->getMessage();
                 continue;
             }
         }
+
+        $counters = $this->userRepository->getRecordCounter();
+        echo "Result:\nadded: {$counters['add']}, skipped: {$counters['skip']}, invalid: {$counters['invalid']}";
     }
 
     public function getRecordsFromCSV(string $filepath): Iterator

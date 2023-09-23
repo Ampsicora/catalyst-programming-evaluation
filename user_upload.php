@@ -38,7 +38,7 @@ try {
     ]);
 
     $userRepository = new UserRepository;
-    $userUpload     = new UserUpload($dryRun, $userRepository);
+    $userUpload     = new UserUpload($userRepository, $dryRun);
 
     if ($createTable) {
         echo 'Users table created successfully';

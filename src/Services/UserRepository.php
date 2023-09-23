@@ -11,6 +11,9 @@ use Exception;
 
 class UserRepository
 {
+    protected array $recordCounter = ['add' => 0, 'duplicated' => 0, 'invalid' => 0];
+
+
     public function addUsersTable(): void
     {
         try {
@@ -29,13 +32,33 @@ class UserRepository
         }
     }
 
+    public function checkRecordDuplication(array $record): void
+    {
+        $user = User::where('email', '=', $record['email'])->first();
+
+        if (isset($user)) {
+            $this->incrementRecordCounter('duplicated');
+            throw new Exception("The record {$record['name']}, {$record['surname']}, {$record['email']} is duplicated and will not be added to the db\n");
+        } else
+            $this->incrementRecordCounter('add');
+    }
+
     public function addRecordToDB(array $record)
     {
-        $user = User::firstOrNew(['email' => $record['email']], $record);
+        try {
+            User::create($record);
+        } catch (\Throwable $th) {
+            throw new Exception("Error: unable to add record to db");
+        }
+    }
 
-        if ($user->exists)
-            throw new Exception("Warning: The record {$record['name']}, {$record['surname']}, {$record['email']} is duplicated, so it will not be added to the database\n");
+    public function getRecordCounter(): array
+    {
+        return $this->recordCounter;
+    }
 
-        return $user;
+    public function incrementRecordCounter(string $counter): void
+    {
+        $this->recordCounter[$counter]++;
     }
 }
