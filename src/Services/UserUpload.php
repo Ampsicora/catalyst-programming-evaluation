@@ -34,6 +34,7 @@ class UserUpload
     public function run(string $filepath): void
     {
         $records    = $this->getRecordsFromCSV($filepath);
+        $emails     = [];
         $chunk      = [];
 
         foreach ($records as $record) {
@@ -45,18 +46,28 @@ class UserUpload
                     throw new Exception("Warning: email {$record['email']} is not valid and will not be added to the database \n");
                 }
 
-                $this->userRepository->checkRecordDuplication($record);
+                $emails[] = $record['email'];
+                $chunk[] = $record;
 
-                if (!$this->dryRun)
-                    $this->userRepository->addRecordToDB($record);
+                if (!$this->dryRun && count($chunk) === $this->chunkSize) {
+                    $this->userRepository->countEmailDuplications($emails);
+                    $this->userRepository->addChunkToDB($chunk);
+                    $chunk = [];
+                }
             } catch (\Throwable $e) {
                 echo $e->getMessage();
                 continue;
             }
         }
 
+        if (!empty($chunk) && !$this->dryRun) {
+            $this->userRepository->countEmailDuplications($emails);
+            $this->userRepository->addChunkToDB($chunk);
+            $chunk = [];
+        }
+
         $counters = $this->userRepository->getRecordCounter();
-        echo "Result:\nadded: {$counters['add']}, skipped: {$counters['skip']}, invalid: {$counters['invalid']}";
+        echo "New: {$counters['new']} | Duplications: {$counters['duplications']} | Invalid: {$counters['invalid']}";
     }
 
     public function getRecordsFromCSV(string $filepath): Iterator

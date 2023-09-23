@@ -11,7 +11,7 @@ use Exception;
 
 class UserRepository
 {
-    protected array $recordCounter = ['add' => 0, 'duplicated' => 0, 'invalid' => 0];
+    protected array $recordCounter = ['new' => 0, 'duplications' => 0, 'invalid' => 0];
 
 
     public function addUsersTable(): void
@@ -32,23 +32,18 @@ class UserRepository
         }
     }
 
-    public function checkRecordDuplication(array $record): void
+    public function countEmailDuplications(array $emails): void
     {
-        $user = User::where('email', '=', $record['email'])->first();
-
-        if (isset($user)) {
-            $this->incrementRecordCounter('duplicated');
-            throw new Exception("The record {$record['name']}, {$record['surname']}, {$record['email']} is duplicated and will not be added to the db\n");
-        } else
-            $this->incrementRecordCounter('add');
+        $this->recordCounter['duplications'] += User::where('email', 'in', $emails)->count();
     }
 
-    public function addRecordToDB(array $record)
+    public function addChunkToDB(array $chunk)
     {
         try {
-            User::create($record);
+            User::upsert($chunk, ['email'], []);
+            $this->recordCounter['new'] += count($chunk);
         } catch (\Throwable $th) {
-            throw new Exception("Error: unable to add record to db");
+            throw new Exception("Error: unable to add records to db:\n{$th}");
         }
     }
 
