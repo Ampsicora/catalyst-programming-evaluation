@@ -6,6 +6,8 @@ require __DIR__ . '/vendor/autoload.php';
 
 use function App\displayHelp;
 use App\Database\Connection;
+use App\Services\UserUpload;
+use App\Services\UserRepository;
 
 
 try {
@@ -35,7 +37,13 @@ try {
         'password'  => $options['p'],
     ]);
 
-    $userUpload = new UserUpload($dryRun, $createTable);
+    $userRepository = new UserRepository;
+    $userUpload     = new UserUpload($dryRun, $userRepository);
+
+    if ($createTable) {
+        echo 'Users table created successfully';
+        exit(0);
+    }
 
     $userUpload->run($options['file']);
 } catch (\Throwable $e) {
