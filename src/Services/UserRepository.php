@@ -11,9 +11,6 @@ use Exception;
 
 class UserRepository
 {
-    protected array $recordCounter = ['new' => 0, 'duplications' => 0, 'invalid' => 0];
-
-
     public function addUsersTable(): void
     {
         try {
@@ -28,32 +25,21 @@ class UserRepository
                 $table->timestamps();
             });
         } catch (\Throwable) {
-            throw new Exception("Error Creating the user table");
+            throw new Exception("Error creating the user table");
         }
     }
 
-    public function countEmailDuplications(array $emails): void
+    public function countEmailDuplications(array $emails): int
     {
-        $this->recordCounter['duplications'] += User::whereIn('email', $emails)->count();
+        return User::whereIn('email', $emails)->count();
     }
 
-    public function addChunkToDB(array $chunk)
+    public function addChunkToDB(array $chunk): void
     {
         try {
             User::upsert($chunk, ['email'], []);
-            $this->recordCounter['new'] += count($chunk);
         } catch (\Throwable $th) {
             throw new Exception("Error: unable to add records to db:\n{$th}");
         }
-    }
-
-    public function getRecordCounter(): array
-    {
-        return $this->recordCounter;
-    }
-
-    public function incrementRecordCounter(string $counter): void
-    {
-        $this->recordCounter[$counter]++;
     }
 }

@@ -25,33 +25,38 @@ class UserUpload
         $this->userRepository   = $userRepository;
         $this->dryRun           = $dryRun;
         $this->chunkSize        = $chunkSize;
-
-        if (!$this->dryRun)
-            $userRepository->addUsersTable();
     }
 
 
     public function run(string $filepath): void
     {
-        $records    = $this->getRecordsFromCSV($filepath);
-        $emails     = [];
-        $chunk      = [];
+        $records = $this->getRecordsFromCSV($filepath);
+        $emails = $chunk = [];
+        $total = $duplications = $invalid = 0;
 
         foreach ($records as $record) {
+            $total++;
+
             try {
                 $record = normalization($record);
 
                 if (!is_email_valid($record['email'])) {
-                    $this->userRepository->incrementRecordCounter('invalid');
+                    $invalid++;
                     throw new Exception("Warning: email {$record['email']} is not valid and will not be added to the database \n");
                 }
 
-                $emails[] = $record['email'];
+                if (isset($emails[$record['email']])) {
+                    $duplications++;
+                    continue;
+                }
+
+                $emails[$record['email']] = true;
                 $chunk[] = $record;
 
-                if (!$this->dryRun && count($chunk) === $this->chunkSize) {
-                    $this->userRepository->addChunkToDB($chunk);
-                    $chunk = [];
+                if (count($chunk) === $this->chunkSize) {
+                    $duplications += $this->userRepository->countEmailDuplications(array_keys($emails));
+                    !$this->dryRun && $this->userRepository->addChunkToDB($chunk);
+                    $chunk = $emails = [];
                 }
             } catch (\Throwable $e) {
                 echo $e->getMessage();
@@ -59,14 +64,15 @@ class UserUpload
             }
         }
 
-        $this->userRepository->countEmailDuplications($emails);
-        if (!empty($chunk) && !$this->dryRun) {
-            $this->userRepository->addChunkToDB($chunk);
-            $chunk = [];
+        if (!empty($chunk)) {
+            $duplications += $this->userRepository->countEmailDuplications(array_keys($emails));
+            !$this->dryRun && $this->userRepository->addChunkToDB($chunk);
+            $chunk = $emails = [];
         }
 
-        $counters = $this->userRepository->getRecordCounter();
-        echo "New: {$counters['new']} | Duplications: {$counters['duplications']} | Invalid: {$counters['invalid']}";
+        $inserted = $total - $duplications - $invalid;
+
+        echo "New: {$inserted} | Duplications: {$duplications} | Invalid: {$invalid}";
     }
 
     public function getRecordsFromCSV(string $filepath): Iterator
