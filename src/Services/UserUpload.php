@@ -31,7 +31,7 @@ class UserUpload
     public function run(string $filepath): void
     {
         $records = $this->getRecordsFromCSV($filepath);
-        $emails = $chunk = [];
+        $emailsFromCSV = $emailsToDB = $chunk = [];
         $total = $duplications = $invalid = 0;
 
         foreach ($records as $record) {
@@ -45,18 +45,18 @@ class UserUpload
                     throw new Exception("Warning: email {$record['email']} is not valid and will not be added to the database \n");
                 }
 
-                if (isset($emails[$record['email']])) {
+                if (array_key_exists($record['email'], $emailsFromCSV)) {
                     $duplications++;
-                    continue;
+                    throw new Exception("Warning: email {$record['email']} is duplicated and will not be added to the database \n");
                 }
 
-                $emails[$record['email']] = true;
+                $emailsFromCSV[$record['email']] = $emailsToDB[$record['email']] = true;
                 $chunk[] = $record;
 
                 if (count($chunk) === $this->chunkSize) {
-                    $duplications += $this->userRepository->countEmailDuplications(array_keys($emails));
+                    $duplications += $this->userRepository->countEmailDuplications(array_keys($emailsToDB));
                     !$this->dryRun && $this->userRepository->addChunkToDB($chunk);
-                    $chunk = $emails = [];
+                    $chunk = $emailsToDB = [];
                 }
             } catch (\Throwable $e) {
                 echo $e->getMessage();
@@ -65,9 +65,9 @@ class UserUpload
         }
 
         if (!empty($chunk)) {
-            $duplications += $this->userRepository->countEmailDuplications(array_keys($emails));
+            $duplications += $this->userRepository->countEmailDuplications(array_keys($emailsToDB));
             !$this->dryRun && $this->userRepository->addChunkToDB($chunk);
-            $chunk = $emails = [];
+            $chunk = $emailsToDB = [];
         }
 
         $inserted = $total - $duplications - $invalid;
